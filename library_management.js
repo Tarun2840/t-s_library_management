@@ -4,15 +4,14 @@ let spinnerEl = document.getElementById("spinner");
 let paraEl = document.getElementById("para");
 
 function appendBooks(result) {
-    console.log(result);
     let divEl = document.createElement("div");
-    divEl.classList.add("d-flex", "flex-column", "justify-content-center");
-    // Create and append the image element  
+    divEl.classList.add("book-card", "d-flex", "flex-column", "align-items-center");
+
     let imgEl = document.createElement("img");
     imgEl.src = result.imageLink;
-    imgEl.alt = result.author; // For better accessibility  
+    imgEl.alt = result.author;
     divEl.appendChild(imgEl);
-    // Create and append the paragraph element  
+
     let pEl = document.createElement("p");
     pEl.textContent = result.author;
     divEl.appendChild(pEl);
@@ -21,51 +20,45 @@ function appendBooks(result) {
 }
 
 function results_to_con(search_results) {
-    // Clear previous results  
     searchResultsEl.textContent = "";
 
     if (search_results.length === 0) {
         paraEl.textContent = "No results found";
     } else {
-        let headingEl = document.createElement('h1');
-        headingEl.textContent = "Popular Books";
-        searchResultsEl.appendChild(headingEl);
-
+        paraEl.textContent = "Popular Books";
         for (let result of search_results) {
             appendBooks(result);
         }
     }
-    spinnerEl.classList.add("d-none"); // Hide the spinner after processing results  
+    spinnerEl.classList.add("d-none");
 }
 
 function searchbooks(event) {
-    if (event.key === "Enter") { // Check if Enter key is pressed  
-        spinnerEl.classList.remove("d-none"); // Show spinner  
-        searchResultsEl.textContent = ""; // Clear previous results  
+    if (event.key === "Enter") {
+        spinnerEl.classList.remove("d-none");
+        searchResultsEl.textContent = "";
+        paraEl.textContent = "";
 
-        let searchInput = searchInputEl.value.trim(); // Get and trim input value  
-        let url = "https://apis.ccbp.in/book-store?title=" + searchInput; // Encode input for URL  
+        let searchInput = searchInputEl.value.trim();
+        let url = "https://apis.ccbp.in/book-store?title=" + encodeURIComponent(searchInput);
         let options = {
             method: "GET"
         };
 
         fetch(url, options)
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(jsonData) {
+            .then(response => response.json())
+            .then(jsonData => {
                 let {
                     search_results
                 } = jsonData;
                 results_to_con(search_results);
             })
-            .catch(function(error) {
+            .catch(error => {
                 console.error("Error fetching data:", error);
                 paraEl.textContent = "Error fetching data. Please try again.";
-                spinnerEl.classList.add("d-none"); // Hide spinner on error  
+                spinnerEl.classList.add("d-none");
             });
     }
 }
 
-// Corrected event listener  
 searchInputEl.addEventListener("keydown", searchbooks);
